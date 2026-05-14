@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% block title %}Admin Analytics | ADBMS Cloud{% endblock %}
+{% block kicker %}Administration{% endblock %}
+{% block page_title %}Analytics Panel{% endblock %}
+{% block content %}
+<section class="row g-3 mb-4">
+  <div class="col-md-4">
+    <div class="metric-card">
+      <span class="metric-icon bg-blue"><i class="bi bi-people"></i></span>
+      <small>Total users</small>
+      <strong>{{ users|length }}</strong>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="metric-card">
+      <span class="metric-icon bg-green"><i class="bi bi-folder2"></i></span>
+      <small>Total files</small>
+      <strong>{{ files|length }}</strong>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="metric-card">
+      <span class="metric-icon bg-orange"><i class="bi bi-hdd"></i></span>
+      <small>Active storage</small>
+      <strong>{{ (total_storage / 1024 / 1024)|round(2) }} MB</strong>
+    </div>
+  </div>
+</section>
+
+<section class="row g-4">
+  <div class="col-lg-5">
+    <div class="surface h-100">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">MongoDB analytics</span>
+          <h3>Action counts</h3>
+        </div>
+      </div>
+      {% if analytics %}
+      <div class="analytics-list">
+        {% for a in analytics %}
+        <div class="analytics-row">
+          <div>
+            <strong>{{ a._id|replace('_', ' ')|title }}</strong>
+            <small>Logged activity</small>
+          </div>
+          <span>{{ a.count }}</span>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state compact">
+        <i class="bi bi-bar-chart"></i>
+        <h4>No analytics yet</h4>
+        <p>Activity counts appear after users interact with the app.</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="col-lg-7">
+    <div class="surface h-100">
+      <div class="section-heading flex-wrap gap-3">
+        <div>
+          <span class="eyebrow">Audit trail</span>
+          <h3>Recent logs</h3>
+        </div>
+        <div class="input-icon compact-search">
+          <i class="bi bi-search"></i>
+          <input class="form-control" placeholder="Filter logs" data-table-search>
+        </div>
+      </div>
+      {% if logs %}
+      <div class="table-responsive">
+        <table class="table align-middle modern-table" data-files-table>
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Action</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for l in logs %}
+            <tr data-file-row>
+              <td>{{ l.username }}</td>
+              <td><span class="badge rounded-pill text-bg-light">{{ l.action }}</span></td>
+              <td>
+                <span class="status-pill {{ 'success' if l.status == 'success' else 'danger' }}">
+                  {{ l.status }}
+                </span>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="empty-state compact">
+        <i class="bi bi-clock-history"></i>
+        <h4>No logs yet</h4>
+        <p>MongoDB audit events will be listed here.</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}

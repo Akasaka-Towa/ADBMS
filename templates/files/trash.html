@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block title %}Trash | ADBMS Cloud{% endblock %}
+{% block kicker %}Recovery{% endblock %}
+{% block page_title %}Trash{% endblock %}
+{% block content %}
+<section class="surface">
+  <div class="section-heading">
+    <div>
+      <span class="eyebrow">Deleted files</span>
+      <h3>Restore items</h3>
+    </div>
+  </div>
+
+  {% if files %}
+  <div class="table-responsive">
+    <table class="table align-middle modern-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Version</th>
+          <th>Size</th>
+          <th class="text-end">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for f in files %}
+        <tr>
+          <td>
+            <div class="file-cell">
+              <span class="file-icon file-default"><i class="bi bi-file-earmark"></i></span>
+              <div>
+                <strong>{{ f.original_name }}</strong>
+                <small>Deleted item</small>
+              </div>
+            </div>
+          </td>
+          <td><span class="badge rounded-pill text-bg-light">v{{ f.current_version }}</span></td>
+          <td>{{ (f.size_bytes / 1024)|round(1) }} KB</td>
+          <td class="text-end">
+            <form method="post" action="{{ url_for('files.restore', file_id=f.id) }}" class="d-inline">
+              <button class="btn btn-sm btn-warning" type="submit">
+                <i class="bi bi-arrow-counterclockwise me-1"></i>Restore
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <i class="bi bi-trash3"></i>
+    <h4>Trash is empty</h4>
+    <p>Deleted files will appear here so they can be restored later.</p>
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

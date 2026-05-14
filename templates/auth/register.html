@@ -1,0 +1,43 @@
+{% extends 'auth/layout.html' %}
+{% block title %}Register | ADBMS Cloud{% endblock %}
+{% block content %}
+<div class="auth-copy">
+  <span class="eyebrow">Get started</span>
+  <h1>Create your account</h1>
+  <p>Set up secure uploads, version tracking, sharing, and recovery in one workspace.</p>
+</div>
+
+<form method="post" class="auth-form">
+  <div class="auth-field">
+    <label for="register-name">Full name</label>
+    <div class="input-icon">
+      <i class="bi bi-person"></i>
+      <input id="register-name" name="full_name" class="form-control" placeholder="Your full name" autocomplete="name" required>
+    </div>
+  </div>
+  <div class="auth-field">
+    <label for="register-email">Email address</label>
+    <div class="input-icon">
+      <i class="bi bi-envelope"></i>
+      <input id="register-email" name="email" type="email" class="form-control" placeholder="name@example.com" autocomplete="email" required>
+    </div>
+  </div>
+  <div class="auth-field">
+    <label for="register-password">Password</label>
+    <div class="input-icon">
+      <i class="bi bi-lock"></i>
+      <input id="register-password" type="password" name="password" class="form-control" placeholder="Create a password" autocomplete="new-password" required>
+    </div>
+  </div>
+  <button class="btn btn-primary btn-lg w-100 auth-submit" type="submit">
+    <span>Create account</span><i class="bi bi-arrow-right"></i>
+  </button>
+</form>
+
+<div class="auth-divider"><span>Already registered?</span></div>
+
+<div class="auth-switch">
+  <span>Return to your existing workspace.</span>
+  <a href="{{ url_for('auth.login') }}">Login instead</a>
+</div>
+{% endblock %}

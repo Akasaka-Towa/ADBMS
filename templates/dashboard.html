@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard | ADBMS Cloud{% endblock %}
+{% block kicker %}Overview{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block content %}
+{% set usage_mb = (usage / 1024 / 1024)|round(2) %}
+{% set storage_percent = ((usage / (20 * 1024 * 1024)) * 100)|round(0) %}
+{% set storage_width = storage_percent if storage_percent < 100 else 100 %}
+{% set avg_size = ((usage / files|length / 1024)|round(1)) if files|length else 0 %}
+
+<section class="dashboard-hero mb-4">
+  <div>
+    <span class="eyebrow">Personal cloud</span>
+    <h2>Welcome back, {{ current_user.full_name }}.</h2>
+    <p>Your storage, sharing, and account activity at a glance.</p>
+  </div>
+  <div class="hero-actions">
+    <a class="btn btn-light btn-lg" href="{{ url_for('files.list_files') }}">
+      <i class="bi bi-cloud-upload me-2"></i>Upload file
+    </a>
+    <a class="btn btn-outline-light btn-lg" href="{{ url_for('files.trash') }}">
+      <i class="bi bi-arrow-counterclockwise me-2"></i>Recovery
+    </a>
+  </div>
+</section>
+
+<section class="dashboard-metrics mb-4">
+  <div class="analytics-card analytics-card-primary">
+    <div class="analytics-topline">
+      <span class="metric-icon bg-blue"><i class="bi bi-folder2-open"></i></span>
+      <span class="trend-pill"><i class="bi bi-arrow-up-right"></i> Active</span>
+    </div>
+    <small>Total files</small>
+    <strong>{{ files|length }}</strong>
+    <p>{{ avg_size }} KB average size</p>
+  </div>
+
+  <div class="analytics-card">
+    <div class="analytics-topline">
+      <span class="metric-icon bg-green"><i class="bi bi-hdd-stack"></i></span>
+      <span class="trend-pill muted">{{ storage_width }}% used</span>
+    </div>
+    <small>Storage used</small>
+    <strong>{{ usage_mb }} MB</strong>
+    <div class="progress analytics-progress">
+      <div class="progress-bar" style="width: {{ storage_width }}%"></div>
+    </div>
+    <p>20 MB available quota</p>
+  </div>
+
+  <div class="analytics-card">
+    <div class="analytics-topline">
+      <span class="metric-icon bg-purple"><i class="bi bi-download"></i></span>
+      <span class="trend-pill muted">Transfers</span>
+    </div>
+    <small>Downloads</small>
+    <strong>{{ total_downloads }}</strong>
+    <p>{{ (total_downloads / files|length)|round(1) if files|length else 0 }} per file</p>
+  </div>
+
+  <div class="analytics-card">
+    <div class="analytics-topline">
+      <span class="metric-icon bg-orange"><i class="bi bi-share"></i></span>
+      <span class="trend-pill muted">Collab</span>
+    </div>
+    <small>Shared files</small>
+    <strong>{{ shared_count }}</strong>
+    <p>{{ active_users }} active user{{ '' if active_users == 1 else 's' }}</p>
+  </div>
+</section>
+
+<section class="row g-4">
+  <div class="col-xl-7">
+    <div class="surface dashboard-panel h-100">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">Analytics</span>
+          <h3>Storage overview</h3>
+        </div>
+        <span class="badge rounded-pill text-bg-light">{{ storage_width }}% used</span>
+      </div>
+
+      <div class="storage-dashboard">
+        <div class="storage-ring" style="--value: {{ storage_width }}%">
+          <div>
+            <strong>{{ storage_width }}%</strong>
+            <span>used</span>
+          </div>
+        </div>
+        <div class="storage-detail">
+          <h4>{{ usage_mb }} MB stored</h4>
+          <p>Across {{ files|length }} active file{{ '' if files|length == 1 else 's' }} with {{ total_downloads }} total download{{ '' if total_downloads == 1 else 's' }}.</p>
+          <div class="progress storage-progress">
+            <div class="progress-bar" style="width: {{ storage_width }}%"></div>
+          </div>
+          <div class="d-flex justify-content-between text-muted small">
+            <span>0 MB</span>
+            <span>20 MB</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="insight-grid">
+        <div class="insight-card">
+          <i class="bi bi-file-earmark-check"></i>
+          <div>
+            <strong>{{ files|length }}</strong>
+            <span>Active files</span>
+          </div>
+        </div>
+        <div class="insight-card">
+          <i class="bi bi-share"></i>
+          <div>
+            <strong>{{ shared_count }}</strong>
+            <span>Shares created</span>
+          </div>
+        </div>
+        <div class="insight-card">
+          <i class="bi bi-cloud-download"></i>
+          <div>
+            <strong>{{ total_downloads }}</strong>
+            <span>Downloads</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-5">
+    <div class="surface dashboard-panel h-100">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">Activity</span>
+          <h3>Recent activity</h3>
+        </div>
+        <span class="badge rounded-pill text-bg-light">{{ recent_logs|length }} event{{ '' if recent_logs|length == 1 else 's' }}</span>
+      </div>
+
+      {% if recent_logs %}
+      <div class="activity-timeline">
+        {% for l in recent_logs %}
+        {% set action = l.action|lower %}
+        <div class="timeline-item">
+          <span class="timeline-icon {{ 'danger' if l.status == 'failed' else 'success' }}">
+            {% if 'login' in action %}
+            <i class="bi bi-box-arrow-in-right"></i>
+            {% elif 'upload' in action %}
+            <i class="bi bi-cloud-upload"></i>
+            {% elif 'download' in action %}
+            <i class="bi bi-download"></i>
+            {% elif 'share' in action %}
+            <i class="bi bi-share"></i>
+            {% elif 'delete' in action %}
+            <i class="bi bi-trash"></i>
+            {% elif 'restore' in action %}
+            <i class="bi bi-arrow-counterclockwise"></i>
+            {% else %}
+            <i class="bi bi-activity"></i>
+            {% endif %}
+          </span>
+          <div>
+            <div class="timeline-title">
+              <strong>{{ l.action|replace('_', ' ')|title }}</strong>
+              <span class="status-pill {{ 'danger' if l.status == 'failed' else 'success' }}">{{ l.status }}</span>
+            </div>
+            <small>{{ l.username }}</small>
+            {% if l.metadata %}
+            <p>{{ l.metadata }}</p>
+            {% endif %}
+          </div>
+          <time>{{ l.timestamp.strftime('%d %b, %H:%M') if l.timestamp and l.timestamp.strftime else l.timestamp }}</time>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state compact">
+        <i class="bi bi-activity"></i>
+        <h4>No activity yet</h4>
+        <p>Your uploads, shares, and account actions will appear here.</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}

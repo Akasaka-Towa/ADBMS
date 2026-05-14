@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}Access Denied | ADBMS Cloud{% endblock %}
+{% block kicker %}Permission required{% endblock %}
+{% block page_title %}Access denied{% endblock %}
+{% block content %}
+<section class="surface">
+  <div class="empty-state">
+    <i class="bi bi-shield-exclamation"></i>
+    <h4>You do not have access to this page</h4>
+    <p>Use the navigation to return to your workspace or contact an administrator.</p>
+    <a class="btn btn-primary" href="{{ url_for('dashboard.home') }}">Back to dashboard</a>
+  </div>
+</section>
+{% endblock %}

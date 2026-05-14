@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+{% block title %}My Files | ADBMS Cloud{% endblock %}
+{% block kicker %}File manager{% endblock %}
+{% block page_title %}My Files{% endblock %}
+{% block content %}
+<section class="row g-4">
+  <div class="col-xl-4">
+    <div class="surface upload-surface upload-pro">
+      <div class="section-heading upload-heading">
+        <div>
+          <span class="eyebrow">Upload</span>
+          <h3>Upload to cloud</h3>
+          <p>Drag a file into the drop zone or choose one from your device.</p>
+        </div>
+      </div>
+      <form method="post" action="{{ url_for('files.upload_file') }}" enctype="multipart/form-data" class="upload-form" data-upload-form>
+        <label class="drop-zone pro-drop-zone" for="file-upload" data-drop-zone>
+          <input id="file-upload" type="file" name="file" required data-file-input>
+          <span class="drop-icon pro-drop-icon"><i class="bi bi-cloud-arrow-up"></i></span>
+          <strong data-file-label>Drop your file here</strong>
+          <small>or click to browse from your computer</small>
+          <span class="browse-pill"><i class="bi bi-folder2-open me-1"></i>Choose file</span>
+        </label>
+
+        <div class="selected-file-card d-none" data-file-preview>
+          <span class="selected-file-icon"><i class="bi bi-file-earmark-arrow-up"></i></span>
+          <div>
+            <strong data-selected-name>No file selected</strong>
+            <small data-selected-size>Ready to upload</small>
+          </div>
+          <button class="icon-btn mini" type="button" data-clear-file aria-label="Remove selected file">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+
+        <div class="upload-type-chips" aria-label="Supported file types">
+          <span>PDF</span>
+          <span>Images</span>
+          <span>DOCX</span>
+          <span>XLSX</span>
+          <span>CSV</span>
+        </div>
+
+        <div class="upload-progress d-none" data-upload-progress>
+          <div class="d-flex justify-content-between small mb-2">
+            <span data-upload-status>Preparing upload</span>
+            <span data-upload-percent>0%</span>
+          </div>
+          <div class="progress upload-progress-track">
+            <div class="progress-bar upload-progress-bar progress-bar-striped progress-bar-animated" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <button class="btn btn-primary w-100 upload-submit" type="submit">
+          <i class="bi bi-upload me-2"></i>Upload file
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <div class="col-xl-8">
+    <div class="surface">
+      <div class="section-heading flex-wrap gap-3">
+        <div>
+          <span class="eyebrow">Library</span>
+          <h3>{{ files|length }} active file{{ '' if files|length == 1 else 's' }}</h3>
+        </div>
+        <form method="get" class="filter-bar">
+          <div class="input-icon">
+            <i class="bi bi-search"></i>
+            <input class="form-control" name="name" value="{{ request.args.get('name', '') }}" placeholder="Search filename" data-table-search>
+          </div>
+          <select class="form-select" name="ext" aria-label="Filter by type">
+            <option value="">All types</option>
+            {% for ext in ['pdf','png','jpg','jpeg','txt','docx','xlsx','csv','zip','mp4'] %}
+            <option value="{{ ext }}" {% if request.args.get('ext') == ext %}selected{% endif %}>.{{ ext }}</option>
+            {% endfor %}
+          </select>
+          <button class="btn btn-outline-primary" type="submit"><i class="bi bi-funnel me-1"></i>Filter</button>
+        </form>
+      </div>
+
+      {% if files %}
+      <div class="table-responsive">
+        <table class="table align-middle modern-table" data-files-table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Version</th>
+              <th>Size</th>
+              <th>Share</th>
+              <th class="text-end">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for f in files %}
+            {% set ext = (f.extension or f.original_name.rsplit('.', 1)[-1])|lower %}
+            <tr data-file-row>
+              <td>
+                <div class="file-cell">
+                  <span class="file-icon file-{{ ext if ext in ['pdf','png','jpg','jpeg','txt','docx','xlsx','csv','zip','mp4','mov'] else 'default' }}">
+                    {% if ext == 'pdf' %}
+                    <i class="bi bi-file-earmark-pdf"></i>
+                    {% elif ext in ['png','jpg','jpeg'] %}
+                    <i class="bi bi-file-earmark-image"></i>
+                    {% elif ext in ['mp4','mov'] %}
+                    <i class="bi bi-file-earmark-play"></i>
+                    {% elif ext == 'zip' %}
+                    <i class="bi bi-file-earmark-zip"></i>
+                    {% elif ext in ['doc','docx'] %}
+                    <i class="bi bi-file-earmark-word"></i>
+                    {% elif ext in ['xls','xlsx','csv'] %}
+                    <i class="bi bi-file-earmark-spreadsheet"></i>
+                    {% elif ext == 'txt' %}
+                    <i class="bi bi-file-earmark-text"></i>
+                    {% else %}
+                    <i class="bi bi-file-earmark"></i>
+                    {% endif %}
+                  </span>
+                  <div>
+                    <strong>{{ f.original_name }}</strong>
+                    <small>{{ ext|upper }} file</small>
+                  </div>
+                </div>
+              </td>
+              <td><span class="badge rounded-pill text-bg-light">v{{ f.current_version }}</span></td>
+              <td>{{ (f.size_bytes / 1024)|round(1) }} KB</td>
+              <td>
+                <form method="post" action="{{ url_for('files.share_file', file_id=f.id) }}" class="share-form">
+                  <select name="user_id" class="form-select form-select-sm" aria-label="Select user">
+                    {% for u in users %}
+                    <option value="{{ u.id }}">{{ u.full_name }}</option>
+                    {% endfor %}
+                  </select>
+                  <label class="form-check form-check-inline small mb-0">
+                    <input class="form-check-input" type="checkbox" name="can_edit">
+                    <span class="form-check-label">Edit</span>
+                  </label>
+                  <label class="form-check form-check-inline small mb-0">
+                    <input class="form-check-input" type="checkbox" name="can_download" checked>
+                    <span class="form-check-label">Download</span>
+                  </label>
+                  <button class="btn btn-sm btn-outline-secondary" type="submit">
+                    <i class="bi bi-share"></i>
+                  </button>
+                </form>
+              </td>
+              <td>
+                <div class="table-actions">
+                  <a class="btn btn-sm btn-success" href="{{ url_for('files.download_file', file_id=f.id) }}">
+                    <i class="bi bi-download"></i><span>Download</span>
+                  </a>
+                  <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#rename-{{ f.id }}">
+                    <i class="bi bi-pencil"></i>
+                  </button>
+                  <form method="post" action="{{ url_for('files.soft_delete', file_id=f.id) }}" class="d-inline">
+                    <button class="btn btn-sm btn-outline-danger" type="submit" data-confirm="Move this file to trash?">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </form>
+                </div>
+                <div class="collapse mt-2" id="rename-{{ f.id }}">
+                  <form method="post" action="{{ url_for('files.rename_file', file_id=f.id) }}" class="rename-form">
+                    <input class="form-control form-control-sm" name="new_name" value="{{ f.original_name }}" required>
+                    <button class="btn btn-sm btn-primary" type="submit">Save</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="empty-state">
+        <i class="bi bi-folder-plus"></i>
+        <h4>No files yet</h4>
+        <p>Upload your first document to start versioning, sharing, and recovery workflows.</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}
