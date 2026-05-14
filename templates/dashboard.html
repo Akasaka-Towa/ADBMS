@@ -1,0 +1,11 @@
+{% extends 'base.html' %}{% block content %}
+<h3 class="mb-3">Dashboard</h3>
+<div class="row g-3 mb-4">
+  <div class="col-md-2"><div class="card stat"><div class="card-body"><small>Files</small><h4>{{files|length}}</h4></div></div></div>
+  <div class="col-md-2"><div class="card stat"><div class="card-body"><small>Usage</small><h4>{{(usage/1024/1024)|round(2)}} MB</h4></div></div></div>
+  <div class="col-md-2"><div class="card stat"><div class="card-body"><small>Downloads</small><h4>{{total_downloads}}</h4></div></div></div>
+  <div class="col-md-2"><div class="card stat"><div class="card-body"><small>Shared</small><h4>{{shared_count}}</h4></div></div></div>
+  <div class="col-md-2"><div class="card stat"><div class="card-body"><small>Active users</small><h4>{{active_users}}</h4></div></div></div>
+</div>
+<div class="card"><div class="card-body"><h5>Recent Activity</h5><ul class="list-group">{% for l in recent_logs %}<li class="list-group-item d-flex justify-content-between"><span>{{l.action}} - {{l.username}}</span><small>{{l.timestamp}}</small></li>{% endfor %}</ul></div></div>
+{% endblock %}

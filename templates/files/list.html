@@ -1,0 +1,8 @@
+{% extends 'base.html' %}{% block content %}
+<h3>My Files</h3>
+<form method="get" class="row g-2 mb-3"><div class="col"><input class="form-control" name="name" placeholder="Search filename"></div><div class="col"><input class="form-control" name="ext" placeholder="Extension"></div><div class="col-auto"><button class="btn btn-outline-primary">Search</button></div></form>
+<form method="post" action="/files/upload" enctype="multipart/form-data" class="mb-3"><input type="file" name="file" required><button class="btn btn-primary btn-sm">Upload</button></form>
+<table class="table table-hover align-middle"><tr><th>Name</th><th>Version</th><th>Size</th><th>Share</th><th>Actions</th></tr>
+{% for f in files %}<tr><td>{{f.original_name}}</td><td>v{{f.current_version}}</td><td>{{f.size_bytes}}</td><td><form method="post" action="/files/share/{{f.id}}" class="d-flex gap-2"><select name="user_id" class="form-select form-select-sm">{% for u in users %}<option value="{{u.id}}">{{u.full_name}}</option>{% endfor %}</select><button class="btn btn-sm btn-secondary">Share</button></form></td><td><a class="btn btn-sm btn-success" href="/files/download/{{f.id}}">Download</a><form method="post" action="/files/delete/{{f.id}}" class="d-inline"><button class="btn btn-sm btn-danger">Delete</button></form></td></tr>{% endfor %}
+</table>
+{% endblock %}

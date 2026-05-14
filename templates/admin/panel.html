@@ -1,0 +1,5 @@
+{% extends 'base.html' %}{% block content %}
+<h3>Admin Analytics Panel</h3>
+<div class="row g-3 mb-3"><div class="col-md-4"><div class="card stat"><div class="card-body">Users: {{users|length}}</div></div></div><div class="col-md-4"><div class="card stat"><div class="card-body">Files: {{files|length}}</div></div></div><div class="col-md-4"><div class="card stat"><div class="card-body">Storage: {{(total_storage/1024/1024)|round(2)}} MB</div></div></div></div>
+<div class="row"><div class="col-md-6"><div class="card"><div class="card-body"><h5>Action Counts</h5><ul>{% for a in analytics %}<li>{{a._id}} : {{a.count}}</li>{% endfor %}</ul></div></div></div><div class="col-md-6"><div class="card"><div class="card-body"><h5>Recent Logs</h5><div class="table-responsive"><table class="table table-sm"><tr><th>User</th><th>Action</th><th>Status</th></tr>{% for l in logs %}<tr><td>{{l.username}}</td><td>{{l.action}}</td><td>{{l.status}}</td></tr>{% endfor %}</table></div></div></div></div></div>
+{% endblock %}

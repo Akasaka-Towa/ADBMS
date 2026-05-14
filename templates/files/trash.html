@@ -1,0 +1,1 @@
+{% extends 'base.html' %}{% block content %}<h3>Trash</h3><ul>{% for f in files %}<li>{{f.original_name}} <form method="post" action="/files/restore/{{f.id}}" class="d-inline"><button class="btn btn-sm btn-warning">Restore</button></form></li>{% endfor %}</ul>{% endblock %}
